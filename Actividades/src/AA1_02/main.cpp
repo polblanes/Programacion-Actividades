@@ -6,8 +6,8 @@
 #include <string>
 
 //Game general information
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 725
+#define SCREEN_HEIGHT 432
 
 int main(int, char*[]) 
 {
@@ -34,10 +34,31 @@ int main(int, char*[])
 
 	// --- SPRITES ---
 		//Background
-		SDL_Texture* bgTexture{ IMG_LoadTexture(m_renderer, "../../res/img/bg.jpg") };
+		SDL_Texture* bgTexture{ IMG_LoadTexture(m_renderer, "../../res/img/bg_mainmenu.jpg") };
 		if (bgTexture == nullptr) throw "Error: bgTexture init";
 		SDL_Rect bgRect{ 0,0,SCREEN_WIDTH, SCREEN_HEIGHT };
+		//Cursor
+		SDL_Texture* cursorTexture{ IMG_LoadTexture(m_renderer, "../../res/img/greencursor.png") };
+		if (cursorTexture == nullptr) throw "Error: cursorTexture init";
+		SDL_Rect cursorRect{ 0, 0, 30, 30 };
+		//Buttons
+		SDL_Texture* btnNormalTexture{ IMG_LoadTexture(m_renderer, "../../res/img/button01_normal.png") };
+		if (btnNormalTexture == nullptr) throw "Error: btnNormalTexture init";
+		SDL_Texture* btnHoverTexture{ IMG_LoadTexture(m_renderer, "../../res/img/button01_hover.png") };
+		if (btnHoverTexture == nullptr) throw "Error: btnHoverTexture init";
+		SDL_Texture* btnClickTexture{ IMG_LoadTexture(m_renderer, "../../res/img/button01_click.png") };
+		if (btnClickTexture == nullptr) throw "Error: btnClickTexture init";
+
+		SDL_Rect btnPlayRect{ SCREEN_WIDTH / 2 - 246 / 2, SCREEN_HEIGHT / 4 - 67 / 2, 246, 67 };
+		SDL_Rect btnSoundRect{ SCREEN_WIDTH / 2 - 246 / 2, SCREEN_HEIGHT / 2 - 67 / 2, 246, 67 };
+		SDL_Rect btnQuitRect{ SCREEN_WIDTH / 2 - 246 / 2, 3 * SCREEN_HEIGHT / 4 - 67 / 2, 246, 67 };
+
+		bool mouseOnPlay = false;
+		bool mouseOnSound = false;
+		bool mouseOnQuit = true;
+
 	//-->Animated Sprite ---
+		
 
 	// --- TEXT ---
 
@@ -46,6 +67,7 @@ int main(int, char*[])
 	// --- GAME LOOP ---
 	SDL_Event event;
 	bool isRunning = true;
+	SDL_ShowCursor(SDL_DISABLE);
 	while (isRunning) {
 		// HANDLE EVENTS
 		while (SDL_PollEvent(&event)) {
@@ -61,11 +83,64 @@ int main(int, char*[])
 		}
 
 		// UPDATE
-
+		int mouseX, mouseY;
+		SDL_GetMouseState(&mouseX, &mouseY);
+		cursorRect.x = mouseX;
+		cursorRect.y = mouseY;
 		// DRAW
 		SDL_RenderClear(m_renderer);
 			//Background
 			SDL_RenderCopy(m_renderer, bgTexture, nullptr, &bgRect);
+
+			//Buttons
+			if ((mouseX < (btnPlayRect.x + btnPlayRect.w) && mouseX > btnPlayRect.x) && 
+				(mouseY < (btnPlayRect.y + btnPlayRect.h) && mouseY >(btnPlayRect.y))) 
+			{
+				//Mouse on play button
+				SDL_RenderCopy(m_renderer, btnHoverTexture, nullptr, &btnPlayRect);
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnSoundRect);
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnQuitRect);
+
+				mouseOnPlay = true;
+				mouseOnSound = false;
+				mouseOnQuit = false;
+			}
+			else if ((mouseX < (btnSoundRect.x + btnSoundRect.w) && mouseX > btnSoundRect.x) &&
+				(mouseY < (btnSoundRect.y + btnSoundRect.h) && mouseY >(btnSoundRect.y)))
+			{
+				//Mouse on Sound Button
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnPlayRect);
+				SDL_RenderCopy(m_renderer, btnHoverTexture, nullptr, &btnSoundRect);
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnQuitRect);
+
+				mouseOnPlay = false;
+				mouseOnSound = true;
+				mouseOnQuit = false;
+			}
+			else if ((mouseX < (btnQuitRect.x + btnQuitRect.w) && mouseX > btnQuitRect.x) &&
+				(mouseY < (btnQuitRect.y + btnQuitRect.h) && mouseY >(btnQuitRect.y)))
+			{
+				//Mouse on Quit button
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnPlayRect);
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnSoundRect);
+				SDL_RenderCopy(m_renderer, btnHoverTexture, nullptr, &btnQuitRect);
+
+				mouseOnPlay = false;
+				mouseOnSound = false;
+				mouseOnQuit = true;
+			}
+			else 
+			{
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnPlayRect);
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnSoundRect);
+				SDL_RenderCopy(m_renderer, btnNormalTexture, nullptr, &btnQuitRect);
+
+				mouseOnPlay = false;
+				mouseOnSound = false;
+				mouseOnQuit = true;
+			}
+			//Cursor
+			SDL_RenderCopy(m_renderer, cursorTexture, nullptr, &cursorRect);
 		SDL_RenderPresent(m_renderer);
 
 	}
